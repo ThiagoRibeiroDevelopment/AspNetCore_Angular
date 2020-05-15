@@ -7,7 +7,7 @@ namespace QuickBuy.Dominio.Entidades
 {
     public abstract class Entidade
     {
-        public List<string> _mensagensValidacao { get; set; }
+        private List<string> _mensagensValidacao { get; set; }
         private List<string> mensagemValidacao 
         {
             //?? pra ver se a lista _mensagensValidacao esta vazia, se tiver retorona a expressao apos ??

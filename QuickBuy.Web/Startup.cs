@@ -3,24 +3,36 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuickBuy.Repositorio.Contexto;
 
 namespace QuickBuy.Web
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder();
+            //optional false pra q esse arquivo sempre seja referenciado
+            //e reloadOnChange q quando for indentificado alguma coisa nessa nesse config.json ele vai ser regarregado por causa da chave true
+            builder.AddJsonFile("config.json", optional:false, reloadOnChange:true);
+            Configuration = builder.Build(); //builder.Build() construi uma interface de configuração com as chaves e valor setadas em cima (optional e reloadOnChange) 
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            //GetConnectionString ta percorendo o arquivo de configuração dentro da estrutura config.json o par chaveValor onde a chave eh QuickBuyDB e retorna a string de conexao
+            var connectionString = Configuration.GetConnectionString("QuickBuyDB");
+            //UseLazyLoadingProxies permite o carregamento automatico de relacionamento entre as classes de configuração
+            services.AddDbContext<QuickBuyContexto>(option => option.UseLazyLoadingProxies()
+                                .UseMySql(connectionString, m => m.MigrationsAssembly("QuickBuy.Repositorio")));
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
